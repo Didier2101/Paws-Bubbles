@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, CheckCircle2, CalendarPlus, PawPrint, User, Mail, Phone, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
-import { format, addDays, startOfToday, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isBefore } from 'date-fns';
+import { Calendar as CalendarIcon, CheckCircle2, PawPrint, User, Mail, Phone, ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, addDays, startOfToday, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { useUserStore } from '@/store/useUserStore';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Service {
@@ -62,7 +62,7 @@ export default function Booking() {
         }
     });
 
-    const { clientName, clientEmail, clientPhone, setUserData } = useUserStore();
+
 
     const [formData, setFormData] = useState({
         pet_name: '',
@@ -152,11 +152,7 @@ export default function Booking() {
         setFormData({ ...formData, date: nextDay, time: '' });
     };
 
-    useEffect(() => {
-        if (clientName || clientEmail || clientPhone) {
-            setFormData(prev => ({ ...prev, client_name: clientName, client_email: clientEmail, client_phone: clientPhone }));
-        }
-    }, [clientName, clientEmail, clientPhone]);
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -190,13 +186,13 @@ export default function Booking() {
                 appointment_date: formData.date,
                 start_time: formData.time,
                 client_name: formData.client_name,
-                client_email: formData.client_email,
+                client_email: formData.client_email.trim().toLowerCase(),
                 client_phone: formData.client_phone,
                 price: formData.price,
-                status: 'pending'
+                status: 'confirmed'
             }]);
             if (error) throw error;
-            setUserData({ name: formData.client_name, email: formData.client_email, phone: formData.client_phone });
+
             setSuccess(true);
             toast.success("¡Reserva realizada con éxito!");
         } catch (error) {
@@ -218,66 +214,63 @@ export default function Booking() {
 
     if (success) {
         return (
-            <div className="flex items-center justify-center p-4 min-h-[600px]">
+            <div className="flex items-center justify-center p-4 min-h-[600px] relative z-10">
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="glass p-10 rounded-[48px] text-center max-w-2xl border border-gray-100 shadow-2xl relative overflow-hidden bg-white"
+                    className="bg-white p-10 rounded-[32px] text-center max-w-xl shadow-2xl relative overflow-hidden ring-1 ring-slate-100"
                 >
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none opacity-30">
-                        <div className="absolute top-[20%] left-[50%] w-96 h-96 bg-emerald-200/50 rounded-full blur-[120px]" />
-                    </div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 bg-gradient-to-b from-indigo-50/50 to-transparent" />
 
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="w-28 h-28 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10"
+                        className="w-24 h-24 bg-emerald-100/50 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-50"
                     >
-                        <CheckCircle2 className="w-14 h-14 text-emerald-500" />
+                        <CheckCircle2 className="w-12 h-12 text-emerald-500" />
                     </motion.div>
 
-                    <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tighter uppercase italic">
-                        ¡RESERVA <span className="text-emerald-500">CONFIRMADA!</span>
-                    </h2>
-
-                    <p className="text-gray-500 mb-4 text-base leading-relaxed">
-                        Hemos recibido tu solicitud para <span className="text-gray-900 font-bold">{formData.pet_name}</span>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-2">¡Todo listo!</h2>
+                    <p className="text-slate-500 mb-8 max-w-xs mx-auto">
+                        Tu cita para <span className="text-slate-900 font-semibold">{formData.pet_name}</span> ha sido Confirmada.
                     </p>
 
-                    <div className="bg-gray-50 border border-gray-100 rounded-3xl p-6 mb-8">
-                        <div className="grid grid-cols-2 gap-4 text-left">
-                            <div>
-                                <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Fecha</div>
-                                <div className="text-gray-900 font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM yyyy', { locale: es })}</div>
+                    <div className="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100">
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-left">
+                            <div className="col-span-1">
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Fecha</div>
+                                <div className="text-slate-900 font-semibold text-sm">{format(new Date(formData.date + 'T12:00:00'), 'dd MMM yyyy', { locale: es })}</div>
                             </div>
-                            <div>
-                                <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Hora</div>
-                                <div className="text-gray-900 font-bold">{formData.time}</div>
+                            <div className="col-span-1">
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Hora</div>
+                                <div className="text-slate-900 font-semibold text-sm">{formData.time}</div>
                             </div>
-                            <div>
-                                <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Servicio</div>
-                                <div className="text-gray-900 font-bold">{formData.service}</div>
-                            </div>
-                            <div>
-                                <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Total</div>
-                                <div className="text-emerald-600 font-black text-xl">${formData.price.toLocaleString()}</div>
+                            <div className="col-span-2 border-t border-slate-200 my-1"></div>
+                            <div className="col-span-2 flex justify-between items-end">
+                                <div>
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Servicio</div>
+                                    <div className="text-slate-900 font-bold text-sm">{formData.service}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total</div>
+                                    <div className="text-emerald-600 font-black text-lg">${formData.price.toLocaleString()}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-3">
                         <Link
                             href="/"
-                            className="w-full py-5 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
+                            className="w-full py-4 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm"
                         >
-                            Ir al Inicio
+                            Volver al Inicio
                         </Link>
                         <button
                             onClick={() => window.location.reload()}
-                            className="w-full py-5 bg-gray-900 text-white font-black rounded-3xl hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-3 group text-sm uppercase tracking-widest shadow-xl"
+                            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
                         >
-                            <CalendarPlus className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                             Agendar otra cita
                         </button>
                     </div>
@@ -287,374 +280,341 @@ export default function Booking() {
     }
 
     return (
-        <div className="max-w-7xl w-full mx-auto p-4">
-            {/* Progress Indicator */}
-            <div className="mb-12">
-                <div className="flex items-center justify-center gap-4 mb-6">
-                    {[1, 2, 3].map((s) => (
-                        <div key={s} className="flex items-center gap-4">
-                            <motion.div
-                                animate={{
-                                    scale: step === s ? 1.1 : 1,
-                                    backgroundColor: step >= s ? '#4f46e5' : '#f3f4f6', // Indigo-600 or Gray-100
-                                    borderColor: step >= s ? '#4f46e5' : '#e5e7eb' // Indigo-600 or Gray-200
-                                }}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center font-black border-2 transition-all ${step >= s ? 'text-white' : 'text-gray-400'
-                                    }`}
-                            >
-                                {s}
-                            </motion.div>
-                            {s < 3 && <div className={`w-16 h-1 rounded-full transition-all ${step > s ? 'bg-indigo-600' : 'bg-gray-200'}`} />}
+        <div className="max-w-5xl w-full mx-auto p-4 md:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                {/* Steps Sidebar / Topbar */}
+                <div className="md:col-span-4 lg:col-span-3">
+                    <div className="sticky top-8 space-y-8">
+                        <div className="text-left">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Reserva tu cita</h2>
+                            <p className="text-slate-500 text-sm">Sigue los pasos para consentir a tu mascota.</p>
                         </div>
-                    ))}
-                </div>
-                <div className="text-center">
-                    <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">
-                        {step === 1 && "Selecciona el Servicio"}
-                        {step === 2 && "Elige Fecha y Hora"}
-                        {step === 3 && "Confirma tus Datos"}
-                    </h3>
-                </div>
-            </div>
 
-            <form onSubmit={handleBooking} className="glass rounded-[48px] border border-gray-100 shadow-xl overflow-hidden bg-white">
-                <AnimatePresence mode="wait">
-                    {/* STEP 1: Service Selection */}
-                    {step === 1 && (
-                        <motion.div
-                            key="step1"
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="p-4 md:p-8 space-y-6"
-                        >
-                            <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                    <PawPrint className="w-5 h-5 text-indigo-600" />
-                                    Nombre de tu Mascota
-                                </label>
-                                <input
-                                    required
-                                    name="pet_name"
-                                    value={formData.pet_name}
-                                    onChange={handleInputChange}
-                                    type="text"
-                                    placeholder="Ej: Toby, Luna, Max..."
-                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
-                                />
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-sm font-black text-gray-500 uppercase tracking-widest">Tamaño de tu Mascota</label>
-                                <div className="grid grid-cols-3 gap-4">
-                                    {['Pequeño', 'Mediano', 'Grande'].map(size => (
-                                        <button
-                                            key={size}
-                                            type="button"
-                                            onClick={() => selectServiceByPetSize(size)}
-                                            className={`p-6 rounded-3xl border-2 transition-all font-bold text-sm uppercase tracking-wider ${formData.pet_type === size
-                                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-600/20'
-                                                : 'bg-white border-gray-100 text-gray-400 hover:border-indigo-200 hover:text-indigo-600'
-                                                }`}
-                                        >
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-sm font-black text-gray-500 uppercase tracking-widest">Selecciona el Servicio</label>
-                                {isLoadingServices ? (
-                                    <div className="text-center text-gray-400 py-8 animate-pulse">Cargando servicios...</div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {dbServices?.filter(s => s.pet_size === formData.pet_type).map(s => (
-                                            <button
-                                                key={s.id}
-                                                type="button"
-                                                onClick={() => selectSpecificService(s)}
-                                                className={`p-6 rounded-3xl border-2 text-left transition-all group ${formData.service === s.name
-                                                    ? 'border-indigo-600 bg-indigo-50 shadow-xl shadow-indigo-600/10'
-                                                    : 'border-gray-100 bg-white hover:border-indigo-200 hover:shadow-md'
-                                                    }`}
-                                            >
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div className={`font-black text-xl transition-colors ${formData.service === s.name ? 'text-indigo-700' : 'text-gray-900'}`}>{s.name}</div>
-                                                    <div className="text-2xl font-black text-indigo-600">${s.price.toLocaleString()}</div>
-                                                </div>
-                                                <div className="text-sm text-gray-500 leading-relaxed">{s.description}</div>
-                                                <div className="mt-3 text-xs text-gray-400 font-bold">Duración: {s.duration_minutes} minutos</div>
-                                            </button>
-                                        ))}
+                        <div className="flex md:flex-col gap-4">
+                            {[1, 2, 3].map((s) => (
+                                <div key={s} className="flex items-center gap-3 group">
+                                    <div className={`
+                                        w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
+                                        ${step === s
+                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105'
+                                            : step > s
+                                                ? 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                                                : 'bg-white text-slate-300 border border-slate-100'}
+                                    `}>
+                                        {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                                     </div>
-                                )}
-                            </div>
+                                    <div className={`hidden md:block text-sm font-medium transition-colors ${step === s ? 'text-indigo-900' : 'text-slate-400'}`}>
+                                        {s === 1 && "Servicio"}
+                                        {s === 2 && "Fecha y Hora"}
+                                        {s === 3 && "Datos"}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
 
-                            <button
-                                type="button"
-                                onClick={() => canProceedStep1 && setStep(2)}
-                                disabled={!canProceedStep1}
-                                className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl shadow-indigo-600/20"
-                            >
-                                Siguiente Paso <ArrowRight className="w-5 h-5" />
-                            </button>
-                        </motion.div>
-                    )}
-
-                    {/* STEP 2: Date & Time */}
-                    {step === 2 && (
-                        <motion.div
-                            key="step2"
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="p-4 md:p-8 space-y-6"
-                        >
-                            <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                    <CalendarIcon className="w-5 h-5 text-indigo-600" />
-                                    Selecciona la Fecha
-                                </label>
-
-                                <div className="bg-gray-50 border-2 border-gray-100 rounded-[32px] p-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h3 className="text-lg font-black text-gray-900 capitalize px-2">
-                                            {format(currentMonth, 'MMMM yyyy', { locale: es })}
-                                        </h3>
-                                        <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                                className="p-2 hover:bg-white hover:shadow-md rounded-full text-gray-500 transition-all border border-transparent hover:border-gray-100"
-                                            >
-                                                <ArrowLeft className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                                className="p-2 hover:bg-white hover:shadow-md rounded-full text-gray-500 transition-all border border-transparent hover:border-gray-100"
-                                            >
-                                                <ArrowRight className="w-5 h-5" />
-                                            </button>
+                {/* Content Area */}
+                <div className="md:col-span-8 lg:col-span-9">
+                    <form onSubmit={handleBooking} className="bg-white rounded-[32px] p-6 md:p-10 shadow-sm border border-slate-100 relative min-h-[500px]">
+                        <AnimatePresence mode="wait">
+                            {/* STEP 1: Service Selection */}
+                            {step === 1 && (
+                                <motion.div
+                                    key="step1"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-8"
+                                >
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-bold text-slate-900 ml-1">¿Cómo se llama tu mascota?</label>
+                                        <div className="relative group">
+                                            <PawPrint className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                            <input
+                                                required
+                                                name="pet_name"
+                                                value={formData.pet_name}
+                                                onChange={handleInputChange}
+                                                type="text"
+                                                placeholder="Ej: Toby"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400 font-medium"
+                                            />
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-7 gap-1 mb-2 text-center">
-                                        {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(day => (
-                                            <div key={day} className="text-xs font-black text-gray-400 uppercase py-2">
-                                                {day}
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="grid grid-cols-7 gap-2">
-                                        {days.map((day) => {
-                                            const dateStr = format(day, 'yyyy-MM-dd');
-                                            const today = startOfToday();
-                                            const isDisabled = isBefore(day, today) || (minDate ? dateStr < minDate : false);
-                                            const isSelected = formData.date === dateStr;
-                                            const isCurrentMonth = isSameMonth(day, currentMonth);
-
-                                            if (!isCurrentMonth) return <div key={day.toString()} />;
-
-                                            return (
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-bold text-slate-900 ml-1">Tamaño</label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {['Pequeño', 'Mediano', 'Grande'].map(size => (
                                                 <button
-                                                    key={day.toString()}
+                                                    key={size}
                                                     type="button"
-                                                    disabled={Boolean(isDisabled)}
-                                                    onClick={() => !isDisabled && setFormData({ ...formData, date: dateStr, time: '' })}
-                                                    className={`
-                                                        aspect-square rounded-2xl flex flex-col items-center justify-center text-sm font-bold transition-all relative
-                                                        ${isSelected
-                                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105'
-                                                            : isDisabled
-                                                                ? 'text-gray-300 cursor-not-allowed opacity-50'
-                                                                : 'text-gray-700 hover:bg-white hover:shadow-md hover:scale-105 bg-white/50'
-                                                        }
-                                                    `}
+                                                    onClick={() => selectServiceByPetSize(size)}
+                                                    className={`py-3 rounded-xl border font-medium text-sm transition-all ${formData.pet_type === size
+                                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                                        : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+                                                        }`}
                                                 >
-                                                    <span>{format(day, 'd')}</span>
-                                                    {isSameDay(day, new Date()) && !isSelected && (
-                                                        <span className="w-1 h-1 rounded-full bg-indigo-500 mt-1" />
-                                                    )}
+                                                    {size}
                                                 </button>
-                                            );
-                                        })}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                        <Clock className="w-5 h-5 text-indigo-600" />
-                                        Hora Disponible
-                                    </label>
-                                    {availabilityData && (
-                                        <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                                            {availabilityData.businessHour.open_time.substring(0, 5)} - {availabilityData.businessHour.close_time.substring(0, 5)}
-                                        </span>
-                                    )}
-                                </div>
-
-                                {isLoadingSlots ? (
-                                    <div className="py-8 text-center text-gray-400 animate-pulse">Cargando horarios...</div>
-                                ) : slots.length > 0 ? (
-                                    <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-                                        {slots.map(s => (
-                                            <button
-                                                key={s.time}
-                                                type="button"
-                                                disabled={!s.isAvailable}
-                                                onClick={() => s.isAvailable && setFormData({ ...formData, time: s.time })}
-                                                className={`py-4 rounded-2xl border-2 text-sm font-bold transition-all ${formData.time === s.time
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl'
-                                                    : s.isAvailable
-                                                        ? 'bg-white border-gray-100 text-gray-600 hover:border-indigo-200 hover:text-indigo-600'
-                                                        : 'bg-gray-100 border-gray-100 text-gray-300 cursor-not-allowed line-through'
-                                                    }`}
-                                            >
-                                                {s.time}
-                                            </button>
-                                        ))}
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-bold text-slate-900 ml-1">Selecciona el Servicio</label>
+                                        {isLoadingServices ? (
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {[1, 2].map((i) => (
+                                                    <div key={i} className="p-5 rounded-2xl border border-slate-100 animate-pulse">
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="h-5 bg-slate-200 rounded w-1/2"></div>
+                                                            <div className="h-5 bg-slate-200 rounded w-16"></div>
+                                                        </div>
+                                                        <div className="h-3 bg-slate-100 rounded w-full mb-2"></div>
+                                                        <div className="h-3 bg-slate-100 rounded w-3/4 mb-2"></div>
+                                                        <div className="h-3 bg-slate-100 rounded w-1/3"></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {dbServices?.filter(s => s.pet_size === formData.pet_type).map(s => (
+                                                    <button
+                                                        key={s.id}
+                                                        type="button"
+                                                        onClick={() => selectSpecificService(s)}
+                                                        className={`p-5 rounded-2xl border text-left transition-all group ${formData.service === s.name
+                                                            ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600'
+                                                            : 'border-slate-100 bg-white hover:border-indigo-100 hover:shadow-md'
+                                                            }`}
+                                                    >
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className={`font-bold transition-colors ${formData.service === s.name ? 'text-indigo-700' : 'text-slate-900'}`}>{s.name}</div>
+                                                            <div className="text-indigo-600 font-bold">${s.price.toLocaleString()}</div>
+                                                        </div>
+                                                        <div className="text-sm text-slate-500 leading-relaxed max-w-md">{s.description}</div>
+                                                        <div className="mt-2 text-xs text-slate-400 font-medium">Duración: {s.duration_minutes} min</div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className="p-8 bg-amber-50 border-2 border-amber-100 rounded-[32px] text-center space-y-4">
-                                        <Sparkles className="w-12 h-12 text-amber-500 mx-auto" />
-                                        <div className="text-amber-600 font-black text-lg uppercase tracking-tight">Sin Cupos Disponibles</div>
-                                        <p className="text-gray-500 text-sm">Este día está completamente reservado. ¿Quieres ver el siguiente día?</p>
+
+                                    <div className="pt-4 flex justify-end">
                                         <button
                                             type="button"
-                                            onClick={goToNextDay}
-                                            className="px-8 py-4 bg-amber-500 text-white font-black rounded-3xl text-xs hover:bg-amber-600 transition-all flex items-center justify-center gap-2 mx-auto uppercase tracking-widest"
+                                            onClick={() => canProceedStep1 && setStep(2)}
+                                            disabled={!canProceedStep1}
+                                            className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
                                         >
-                                            Ver {format(addDays(new Date(formData.date + 'T12:00:00'), 1), 'dd MMM', { locale: es })}
+                                            Continuar <ArrowRight className="w-5 h-5" />
                                         </button>
                                     </div>
-                                )}
-                            </div>
+                                </motion.div>
+                            )}
 
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(1)}
-                                    className="flex-1 py-6 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
+                            {/* STEP 2: Date & Time */}
+                            {step === 2 && (
+                                <motion.div
+                                    key="step2"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-8"
                                 >
-                                    <ArrowLeft className="w-5 h-5" /> Atrás
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => canProceedStep2 && setStep(3)}
-                                    disabled={!canProceedStep2}
-                                    className="flex-[2] py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl shadow-indigo-600/20"
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-bold text-slate-900">Fecha</label>
+                                            <div className="flex gap-1">
+                                                <button type="button" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1 hover:bg-slate-100 rounded-lg text-slate-500"><ChevronLeft className="w-5 h-5" /></button>
+                                                <span className="text-sm font-semibold text-slate-700 w-32 text-center py-1">{format(currentMonth, 'MMMM yyyy', { locale: es })}</span>
+                                                <button type="button" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1 hover:bg-slate-100 rounded-lg text-slate-500"><ChevronRight className="w-5 h-5" /></button>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4">
+                                            <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                                                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+                                                    <div key={idx} className="text-xs font-bold text-slate-400 py-2">{day}</div>
+                                                ))}
+                                            </div>
+                                            <div className="grid grid-cols-7 gap-1">
+                                                {days.map((day) => {
+                                                    const dateStr = format(day, 'yyyy-MM-dd');
+                                                    const isDisabled = isBefore(day, startOfToday()) || (minDate ? dateStr < minDate : false);
+                                                    const isSelected = formData.date === dateStr;
+                                                    if (!isSameMonth(day, currentMonth)) return <div key={day.toString()} />;
+
+                                                    return (
+                                                        <button
+                                                            key={day.toString()}
+                                                            type="button"
+                                                            disabled={isDisabled}
+                                                            onClick={() => !isDisabled && setFormData({ ...formData, date: dateStr, time: '' })}
+                                                            className={`
+                                                                aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all
+                                                                ${isSelected ? 'bg-indigo-600 text-white shadow-md' : isDisabled ? 'text-slate-300' : 'text-slate-700 hover:bg-white hover:shadow-sm'}
+                                                            `}
+                                                        >
+                                                            {format(day, 'd')}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-sm font-bold text-slate-900">Horarios Disponibles</label>
+                                            {availabilityData && (
+                                                <span className="text-xs text-indigo-600 font-medium bg-indigo-50 px-2 py-1 rounded">
+                                                    {availabilityData.businessHour.open_time.substring(0, 5)} - {availabilityData.businessHour.close_time.substring(0, 5)}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {isLoadingSlots ? (
+                                            <div className="py-8 text-center text-slate-400">Cargando...</div>
+                                        ) : slots.length > 0 ? (
+                                            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                                                {slots.map(s => (
+                                                    <button
+                                                        key={s.time}
+                                                        type="button"
+                                                        disabled={!s.isAvailable}
+                                                        onClick={() => s.isAvailable && setFormData({ ...formData, time: s.time })}
+                                                        className={`py-2 rounded-lg text-sm font-medium transition-all border ${formData.time === s.time
+                                                            ? 'bg-indigo-600 border-indigo-600 text-white'
+                                                            : s.isAvailable
+                                                                ? 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600'
+                                                                : 'bg-slate-50 border-transparent text-slate-300 line-through'
+                                                            }`}
+                                                    >
+                                                        {s.time}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-8 bg-amber-50 rounded-2xl border border-amber-100 gap-3">
+                                                <Sparkles className="w-8 h-8 text-amber-500" />
+                                                <p className="text-amber-700 font-medium text-sm">Sin cupos este día</p>
+                                                <button onClick={goToNextDay} className="text-xs font-bold text-amber-600 hover:underline">Ver mañana</button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-4 flex justify-between">
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep(1)}
+                                            className="px-6 py-4 text-slate-500 hover:bg-slate-50 font-bold rounded-xl transition-colors text-sm"
+                                        >
+                                            Atrás
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => canProceedStep2 && setStep(3)}
+                                            disabled={!canProceedStep2}
+                                            className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
+                                        >
+                                            Continuar <ArrowRight className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* STEP 3: Contact Info */}
+                            {step === 3 && (
+                                <motion.div
+                                    key="step3"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-6"
                                 >
-                                    Siguiente Paso <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* STEP 3: Contact Info */}
-                    {step === 3 && (
-                        <motion.div
-                            key="step3"
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="p-4 md:p-8 space-y-6"
-                        >
-                            <div className="bg-indigo-50 border-2 border-indigo-100 rounded-3xl p-6 mb-6">
-                                <h4 className="text-xl font-black text-indigo-900 mb-4 uppercase tracking-tight">Resumen de tu Reserva</h4>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <div className="text-gray-500 font-bold uppercase text-xs mb-1">Mascota</div>
-                                        <div className="text-gray-900 font-bold">{formData.pet_name}</div>
+                                    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex gap-4 items-start">
+                                        <div className="p-3 bg-white rounded-xl text-indigo-600 shadow-sm">
+                                            <CalendarIcon className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-indigo-900 text-lg">Resumen</h4>
+                                            <p className="text-indigo-700/80 text-sm mt-1">
+                                                {formData.service} para {formData.pet_name}<br />
+                                                {format(new Date(formData.date + 'T12:00:00'), 'EEEE d MMMM', { locale: es })} a las {formData.time}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="text-gray-500 font-bold uppercase text-xs mb-1">Servicio</div>
-                                        <div className="text-gray-900 font-bold">{formData.service}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-gray-500 font-bold uppercase text-xs mb-1">Fecha</div>
-                                        <div className="text-gray-900 font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM', { locale: es })}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-gray-500 font-bold uppercase text-xs mb-1">Hora</div>
-                                        <div className="text-gray-900 font-bold">{formData.time}</div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                    <User className="w-5 h-5 text-indigo-600" />
-                                    Tu Nombre Completo
-                                </label>
-                                <input
-                                    required
-                                    name="client_name"
-                                    value={formData.client_name}
-                                    onChange={handleInputChange}
-                                    type="text"
-                                    placeholder="Ej: Juan Pérez"
-                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
-                                />
-                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="col-span-1 md:col-span-2 space-y-2">
+                                            <label className="text-sm font-bold text-slate-900 ml-1">Tu Nombre</label>
+                                            <div className="relative group">
+                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                                <input
+                                                    required
+                                                    name="client_name"
+                                                    value={formData.client_name}
+                                                    onChange={handleInputChange}
+                                                    type="text"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-900 ml-1">Email</label>
+                                            <div className="relative group">
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                                <input
+                                                    required
+                                                    name="client_email"
+                                                    value={formData.client_email}
+                                                    onChange={handleInputChange}
+                                                    type="email"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-900 ml-1">Teléfono</label>
+                                            <div className="relative group">
+                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                                <input
+                                                    required
+                                                    name="client_phone"
+                                                    value={formData.client_phone}
+                                                    onChange={handleInputChange}
+                                                    type="tel"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                        <Mail className="w-5 h-5 text-indigo-600" />
-                                        Email
-                                    </label>
-                                    <input
-                                        required
-                                        name="client_email"
-                                        value={formData.client_email}
-                                        onChange={handleInputChange}
-                                        type="email"
-                                        placeholder="tu@email.com"
-                                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
-                                    />
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
-                                        <Phone className="w-5 h-5 text-indigo-600" />
-                                        Teléfono
-                                    </label>
-                                    <input
-                                        required
-                                        name="client_phone"
-                                        value={formData.client_phone}
-                                        onChange={handleInputChange}
-                                        type="tel"
-                                        placeholder="3001234567"
-                                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(2)}
-                                    className="flex-1 py-6 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
-                                >
-                                    <ArrowLeft className="w-5 h-5" /> Atrás
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading || !canProceedStep3}
-                                    className="flex-[2] py-6 bg-emerald-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-emerald-500 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl shadow-emerald-600/20"
-                                >
-                                    {loading ? 'Procesando...' : 'Confirmar Reserva'} <CheckCircle2 className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </form>
-        </div >
+                                    <div className="pt-4 flex gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep(2)}
+                                            className="flex-1 py-4 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors text-sm border border-slate-200 hover:border-slate-300"
+                                        >
+                                            Atrás
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={loading || !canProceedStep3}
+                                            className="flex-[2] py-4 bg-emerald-500 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+                                        >
+                                            {loading ? 'Confirmando...' : 'Confirmar Reserva'} <CheckCircle2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </form>
+                </div>
+            </div>
+        </div>
     );
 }
