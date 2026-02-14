@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, CheckCircle2, CalendarPlus, PawPrint, User, Mail, Phone, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
-import { format, addDays, startOfToday } from 'date-fns';
+import { format, addDays, startOfToday, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -47,6 +47,7 @@ export default function Booking() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
     const queryClient = useQueryClient();
 
     const { data: dbServices, isLoading: isLoadingServices } = useQuery<Service[]>({
@@ -210,52 +211,57 @@ export default function Booking() {
     const canProceedStep2 = formData.date && formData.time;
     const canProceedStep3 = formData.client_name && formData.client_email && formData.client_phone;
 
+    const days = eachDayOfInterval({
+        start: startOfWeek(startOfMonth(currentMonth), { locale: es }),
+        end: endOfWeek(endOfMonth(currentMonth), { locale: es })
+    });
+
     if (success) {
         return (
             <div className="flex items-center justify-center p-4 min-h-[600px]">
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="glass p-10 rounded-[48px] text-center max-w-2xl border border-white/10 shadow-2xl relative overflow-hidden"
+                    className="glass p-10 rounded-[48px] text-center max-w-2xl border border-gray-100 shadow-2xl relative overflow-hidden bg-white"
                 >
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none opacity-30">
-                        <div className="absolute top-[20%] left-[50%] w-96 h-96 bg-emerald-500/30 rounded-full blur-[120px]" />
+                        <div className="absolute top-[20%] left-[50%] w-96 h-96 bg-emerald-200/50 rounded-full blur-[120px]" />
                     </div>
 
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="w-28 h-28 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/20"
+                        className="w-28 h-28 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10"
                     >
-                        <CheckCircle2 className="w-14 h-14 text-emerald-400" />
+                        <CheckCircle2 className="w-14 h-14 text-emerald-500" />
                     </motion.div>
 
-                    <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase italic">
-                        ¡RESERVA <span className="text-emerald-400">CONFIRMADA!</span>
+                    <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tighter uppercase italic">
+                        ¡RESERVA <span className="text-emerald-500">CONFIRMADA!</span>
                     </h2>
 
-                    <p className="text-gray-400 mb-4 text-base leading-relaxed">
-                        Hemos recibido tu solicitud para <span className="text-white font-bold">{formData.pet_name}</span>
+                    <p className="text-gray-500 mb-4 text-base leading-relaxed">
+                        Hemos recibido tu solicitud para <span className="text-gray-900 font-bold">{formData.pet_name}</span>
                     </p>
 
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8">
+                    <div className="bg-gray-50 border border-gray-100 rounded-3xl p-6 mb-8">
                         <div className="grid grid-cols-2 gap-4 text-left">
                             <div>
                                 <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Fecha</div>
-                                <div className="text-white font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM yyyy', { locale: es })}</div>
+                                <div className="text-gray-900 font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM yyyy', { locale: es })}</div>
                             </div>
                             <div>
                                 <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Hora</div>
-                                <div className="text-white font-bold">{formData.time}</div>
+                                <div className="text-gray-900 font-bold">{formData.time}</div>
                             </div>
                             <div>
                                 <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Servicio</div>
-                                <div className="text-white font-bold">{formData.service}</div>
+                                <div className="text-gray-900 font-bold">{formData.service}</div>
                             </div>
                             <div>
                                 <div className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Total</div>
-                                <div className="text-emerald-400 font-black text-xl">${formData.price.toLocaleString()}</div>
+                                <div className="text-emerald-600 font-black text-xl">${formData.price.toLocaleString()}</div>
                             </div>
                         </div>
                     </div>
@@ -263,13 +269,13 @@ export default function Booking() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Link
                             href="/"
-                            className="w-full py-5 bg-white/5 border-2 border-white/10 text-white font-bold rounded-3xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
+                            className="w-full py-5 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
                         >
                             Ir al Inicio
                         </Link>
                         <button
                             onClick={() => window.location.reload()}
-                            className="w-full py-5 bg-white text-black font-black rounded-3xl hover:bg-emerald-400 hover:text-white transition-all flex items-center justify-center gap-3 group text-sm uppercase tracking-widest shadow-xl"
+                            className="w-full py-5 bg-gray-900 text-white font-black rounded-3xl hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-3 group text-sm uppercase tracking-widest shadow-xl"
                         >
                             <CalendarPlus className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                             Agendar otra cita
@@ -290,19 +296,20 @@ export default function Booking() {
                             <motion.div
                                 animate={{
                                     scale: step === s ? 1.1 : 1,
-                                    backgroundColor: step >= s ? 'rgb(99 102 241)' : 'rgba(255,255,255,0.05)'
+                                    backgroundColor: step >= s ? '#4f46e5' : '#f3f4f6', // Indigo-600 or Gray-100
+                                    borderColor: step >= s ? '#4f46e5' : '#e5e7eb' // Indigo-600 or Gray-200
                                 }}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center font-black border-2 transition-all ${step >= s ? 'border-indigo-500 text-white' : 'border-white/10 text-gray-600'
+                                className={`w-12 h-12 rounded-full flex items-center justify-center font-black border-2 transition-all ${step >= s ? 'text-white' : 'text-gray-400'
                                     }`}
                             >
                                 {s}
                             </motion.div>
-                            {s < 3 && <div className={`w-16 h-1 rounded-full transition-all ${step > s ? 'bg-indigo-500' : 'bg-white/10'}`} />}
+                            {s < 3 && <div className={`w-16 h-1 rounded-full transition-all ${step > s ? 'bg-indigo-600' : 'bg-gray-200'}`} />}
                         </div>
                     ))}
                 </div>
                 <div className="text-center">
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">
+                    <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">
                         {step === 1 && "Selecciona el Servicio"}
                         {step === 2 && "Elige Fecha y Hora"}
                         {step === 3 && "Confirma tus Datos"}
@@ -310,7 +317,7 @@ export default function Booking() {
                 </div>
             </div>
 
-            <form onSubmit={handleBooking} className="glass rounded-[48px] border border-white/10 shadow-2xl overflow-hidden">
+            <form onSubmit={handleBooking} className="glass rounded-[48px] border border-gray-100 shadow-xl overflow-hidden bg-white">
                 <AnimatePresence mode="wait">
                     {/* STEP 1: Service Selection */}
                     {step === 1 && (
@@ -319,11 +326,11 @@ export default function Booking() {
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className="p-8 space-y-6"
+                            className="p-4 md:p-8 space-y-6"
                         >
                             <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                    <PawPrint className="w-5 h-5 text-indigo-400" />
+                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                    <PawPrint className="w-5 h-5 text-indigo-600" />
                                     Nombre de tu Mascota
                                 </label>
                                 <input
@@ -333,12 +340,12 @@ export default function Booking() {
                                     onChange={handleInputChange}
                                     type="text"
                                     placeholder="Ej: Toby, Luna, Max..."
-                                    className="w-full bg-white/5 border-2 border-white/10 rounded-3xl px-8 py-5 text-lg focus:border-indigo-500 outline-none transition-all placeholder:text-gray-600"
+                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
                                 />
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-sm font-black text-gray-400 uppercase tracking-widest">Tamaño de tu Mascota</label>
+                                <label className="text-sm font-black text-gray-500 uppercase tracking-widest">Tamaño de tu Mascota</label>
                                 <div className="grid grid-cols-3 gap-4">
                                     {['Pequeño', 'Mediano', 'Grande'].map(size => (
                                         <button
@@ -347,7 +354,7 @@ export default function Booking() {
                                             onClick={() => selectServiceByPetSize(size)}
                                             className={`p-6 rounded-3xl border-2 transition-all font-bold text-sm uppercase tracking-wider ${formData.pet_type === size
                                                 ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-600/20'
-                                                : 'bg-white/5 border-white/10 text-gray-400 hover:border-indigo-500/50'
+                                                : 'bg-white border-gray-100 text-gray-400 hover:border-indigo-200 hover:text-indigo-600'
                                                 }`}
                                         >
                                             {size}
@@ -357,9 +364,9 @@ export default function Booking() {
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-sm font-black text-gray-400 uppercase tracking-widest">Selecciona el Servicio</label>
+                                <label className="text-sm font-black text-gray-500 uppercase tracking-widest">Selecciona el Servicio</label>
                                 {isLoadingServices ? (
-                                    <div className="text-center text-gray-500 py-8 animate-pulse">Cargando servicios...</div>
+                                    <div className="text-center text-gray-400 py-8 animate-pulse">Cargando servicios...</div>
                                 ) : (
                                     <div className="grid grid-cols-1 gap-4">
                                         {dbServices?.filter(s => s.pet_size === formData.pet_type).map(s => (
@@ -368,16 +375,16 @@ export default function Booking() {
                                                 type="button"
                                                 onClick={() => selectSpecificService(s)}
                                                 className={`p-6 rounded-3xl border-2 text-left transition-all group ${formData.service === s.name
-                                                    ? 'border-indigo-500 bg-indigo-500/20 shadow-xl shadow-indigo-500/10'
-                                                    : 'border-white/10 bg-white/5 hover:border-indigo-500/50'
+                                                    ? 'border-indigo-600 bg-indigo-50 shadow-xl shadow-indigo-600/10'
+                                                    : 'border-gray-100 bg-white hover:border-indigo-200 hover:shadow-md'
                                                     }`}
                                             >
                                                 <div className="flex justify-between items-start mb-3">
-                                                    <div className="font-black text-xl text-white group-hover:text-indigo-400 transition-colors">{s.name}</div>
-                                                    <div className="text-2xl font-black text-indigo-400">${s.price.toLocaleString()}</div>
+                                                    <div className={`font-black text-xl transition-colors ${formData.service === s.name ? 'text-indigo-700' : 'text-gray-900'}`}>{s.name}</div>
+                                                    <div className="text-2xl font-black text-indigo-600">${s.price.toLocaleString()}</div>
                                                 </div>
-                                                <div className="text-sm text-gray-400 leading-relaxed">{s.description}</div>
-                                                <div className="mt-3 text-xs text-gray-500 font-bold">Duración: {s.duration_minutes} minutos</div>
+                                                <div className="text-sm text-gray-500 leading-relaxed">{s.description}</div>
+                                                <div className="mt-3 text-xs text-gray-400 font-bold">Duración: {s.duration_minutes} minutos</div>
                                             </button>
                                         ))}
                                     </div>
@@ -388,7 +395,7 @@ export default function Booking() {
                                 type="button"
                                 onClick={() => canProceedStep1 && setStep(2)}
                                 disabled={!canProceedStep1}
-                                className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-500 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl"
+                                className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl shadow-indigo-600/20"
                             >
                                 Siguiente Paso <ArrowRight className="w-5 h-5" />
                             </button>
@@ -402,39 +409,97 @@ export default function Booking() {
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className="p-8 space-y-6"
+                            className="p-4 md:p-8 space-y-6"
                         >
                             <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                    <CalendarIcon className="w-5 h-5 text-indigo-400" />
+                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                    <CalendarIcon className="w-5 h-5 text-indigo-600" />
                                     Selecciona la Fecha
                                 </label>
-                                <input
-                                    required
-                                    name="date"
-                                    type="date"
-                                    min={minDate}
-                                    value={formData.date}
-                                    onChange={handleInputChange}
-                                    className="w-full bg-white/5 border-2 border-white/10 rounded-3xl px-8 py-5 text-lg focus:border-indigo-500 outline-none transition-all"
-                                />
+
+                                <div className="bg-gray-50 border-2 border-gray-100 rounded-[32px] p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-lg font-black text-gray-900 capitalize px-2">
+                                            {format(currentMonth, 'MMMM yyyy', { locale: es })}
+                                        </h3>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                                                className="p-2 hover:bg-white hover:shadow-md rounded-full text-gray-500 transition-all border border-transparent hover:border-gray-100"
+                                            >
+                                                <ArrowLeft className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                                                className="p-2 hover:bg-white hover:shadow-md rounded-full text-gray-500 transition-all border border-transparent hover:border-gray-100"
+                                            >
+                                                <ArrowRight className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                                        {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(day => (
+                                            <div key={day} className="text-xs font-black text-gray-400 uppercase py-2">
+                                                {day}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="grid grid-cols-7 gap-2">
+                                        {days.map((day) => {
+                                            const dateStr = format(day, 'yyyy-MM-dd');
+                                            const today = startOfToday();
+                                            const isDisabled = isBefore(day, today) || (minDate ? dateStr < minDate : false);
+                                            const isSelected = formData.date === dateStr;
+                                            const isCurrentMonth = isSameMonth(day, currentMonth);
+
+                                            if (!isCurrentMonth) return <div key={day.toString()} />;
+
+                                            return (
+                                                <button
+                                                    key={day.toString()}
+                                                    type="button"
+                                                    disabled={Boolean(isDisabled)}
+                                                    onClick={() => !isDisabled && setFormData({ ...formData, date: dateStr, time: '' })}
+                                                    className={`
+                                                        aspect-square rounded-2xl flex flex-col items-center justify-center text-sm font-bold transition-all relative
+                                                        ${isSelected
+                                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105'
+                                                            : isDisabled
+                                                                ? 'text-gray-300 cursor-not-allowed opacity-50'
+                                                                : 'text-gray-700 hover:bg-white hover:shadow-md hover:scale-105 bg-white/50'
+                                                        }
+                                                    `}
+                                                >
+                                                    <span>{format(day, 'd')}</span>
+                                                    {isSameDay(day, new Date()) && !isSelected && (
+                                                        <span className="w-1 h-1 rounded-full bg-indigo-500 mt-1" />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                        <Clock className="w-5 h-5 text-indigo-400" />
+                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                        <Clock className="w-5 h-5 text-indigo-600" />
                                         Hora Disponible
                                     </label>
                                     {availabilityData && (
-                                        <span className="text-xs text-indigo-400 font-bold bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+                                        <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
                                             {availabilityData.businessHour.open_time.substring(0, 5)} - {availabilityData.businessHour.close_time.substring(0, 5)}
                                         </span>
                                     )}
                                 </div>
 
                                 {isLoadingSlots ? (
-                                    <div className="py-8 text-center text-gray-500 animate-pulse">Cargando horarios...</div>
+                                    <div className="py-8 text-center text-gray-400 animate-pulse">Cargando horarios...</div>
                                 ) : slots.length > 0 ? (
                                     <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
                                         {slots.map(s => (
@@ -446,8 +511,8 @@ export default function Booking() {
                                                 className={`py-4 rounded-2xl border-2 text-sm font-bold transition-all ${formData.time === s.time
                                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl'
                                                     : s.isAvailable
-                                                        ? 'bg-white/5 border-white/10 text-gray-300 hover:border-indigo-500/50'
-                                                        : 'bg-red-500/5 border-red-500/10 text-red-900/30 cursor-not-allowed line-through'
+                                                        ? 'bg-white border-gray-100 text-gray-600 hover:border-indigo-200 hover:text-indigo-600'
+                                                        : 'bg-gray-100 border-gray-100 text-gray-300 cursor-not-allowed line-through'
                                                     }`}
                                             >
                                                 {s.time}
@@ -455,14 +520,14 @@ export default function Booking() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="p-8 bg-amber-500/10 border-2 border-amber-500/20 rounded-[32px] text-center space-y-4">
+                                    <div className="p-8 bg-amber-50 border-2 border-amber-100 rounded-[32px] text-center space-y-4">
                                         <Sparkles className="w-12 h-12 text-amber-500 mx-auto" />
-                                        <div className="text-amber-400 font-black text-lg uppercase tracking-tight">Sin Cupos Disponibles</div>
-                                        <p className="text-gray-400 text-sm">Este día está completamente reservado. ¿Quieres ver el siguiente día?</p>
+                                        <div className="text-amber-600 font-black text-lg uppercase tracking-tight">Sin Cupos Disponibles</div>
+                                        <p className="text-gray-500 text-sm">Este día está completamente reservado. ¿Quieres ver el siguiente día?</p>
                                         <button
                                             type="button"
                                             onClick={goToNextDay}
-                                            className="px-8 py-4 bg-amber-500 text-black font-black rounded-3xl text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-2 mx-auto uppercase tracking-widest"
+                                            className="px-8 py-4 bg-amber-500 text-white font-black rounded-3xl text-xs hover:bg-amber-600 transition-all flex items-center justify-center gap-2 mx-auto uppercase tracking-widest"
                                         >
                                             Ver {format(addDays(new Date(formData.date + 'T12:00:00'), 1), 'dd MMM', { locale: es })}
                                         </button>
@@ -474,7 +539,7 @@ export default function Booking() {
                                 <button
                                     type="button"
                                     onClick={() => setStep(1)}
-                                    className="flex-1 py-6 bg-white/5 border-2 border-white/10 text-white font-bold rounded-3xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
+                                    className="flex-1 py-6 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
                                 >
                                     <ArrowLeft className="w-5 h-5" /> Atrás
                                 </button>
@@ -482,7 +547,7 @@ export default function Booking() {
                                     type="button"
                                     onClick={() => canProceedStep2 && setStep(3)}
                                     disabled={!canProceedStep2}
-                                    className="flex-[2] py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-500 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl"
+                                    className="flex-[2] py-6 bg-indigo-600 text-white font-black rounded-3xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-xl shadow-indigo-600/20"
                                 >
                                     Siguiente Paso <ArrowRight className="w-5 h-5" />
                                 </button>
@@ -497,33 +562,33 @@ export default function Booking() {
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className="p-8 space-y-6"
+                            className="p-4 md:p-8 space-y-6"
                         >
-                            <div className="bg-indigo-500/10 border-2 border-indigo-500/20 rounded-3xl p-6 mb-6">
-                                <h4 className="text-xl font-black text-white mb-4 uppercase tracking-tight">Resumen de tu Reserva</h4>
+                            <div className="bg-indigo-50 border-2 border-indigo-100 rounded-3xl p-6 mb-6">
+                                <h4 className="text-xl font-black text-indigo-900 mb-4 uppercase tracking-tight">Resumen de tu Reserva</h4>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <div className="text-gray-500 font-bold uppercase text-xs mb-1">Mascota</div>
-                                        <div className="text-white font-bold">{formData.pet_name}</div>
+                                        <div className="text-gray-900 font-bold">{formData.pet_name}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-500 font-bold uppercase text-xs mb-1">Servicio</div>
-                                        <div className="text-white font-bold">{formData.service}</div>
+                                        <div className="text-gray-900 font-bold">{formData.service}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-500 font-bold uppercase text-xs mb-1">Fecha</div>
-                                        <div className="text-white font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM', { locale: es })}</div>
+                                        <div className="text-gray-900 font-bold">{format(new Date(formData.date + 'T12:00:00'), 'dd MMMM', { locale: es })}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-500 font-bold uppercase text-xs mb-1">Hora</div>
-                                        <div className="text-white font-bold">{formData.time}</div>
+                                        <div className="text-gray-900 font-bold">{formData.time}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                    <User className="w-5 h-5 text-indigo-400" />
+                                <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                    <User className="w-5 h-5 text-indigo-600" />
                                     Tu Nombre Completo
                                 </label>
                                 <input
@@ -533,14 +598,14 @@ export default function Booking() {
                                     onChange={handleInputChange}
                                     type="text"
                                     placeholder="Ej: Juan Pérez"
-                                    className="w-full bg-white/5 border-2 border-white/10 rounded-3xl px-8 py-5 text-lg focus:border-indigo-500 outline-none transition-all placeholder:text-gray-600"
+                                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                        <Mail className="w-5 h-5 text-indigo-400" />
+                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                        <Mail className="w-5 h-5 text-indigo-600" />
                                         Email
                                     </label>
                                     <input
@@ -550,12 +615,12 @@ export default function Booking() {
                                         onChange={handleInputChange}
                                         type="email"
                                         placeholder="tu@email.com"
-                                        className="w-full bg-white/5 border-2 border-white/10 rounded-3xl px-8 py-5 text-lg focus:border-indigo-500 outline-none transition-all placeholder:text-gray-600"
+                                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="flex items-center gap-3 text-sm font-black text-gray-400 uppercase tracking-widest">
-                                        <Phone className="w-5 h-5 text-indigo-400" />
+                                    <label className="flex items-center gap-3 text-sm font-black text-gray-500 uppercase tracking-widest">
+                                        <Phone className="w-5 h-5 text-indigo-600" />
                                         Teléfono
                                     </label>
                                     <input
@@ -565,7 +630,7 @@ export default function Booking() {
                                         onChange={handleInputChange}
                                         type="tel"
                                         placeholder="3001234567"
-                                        className="w-full bg-white/5 border-2 border-white/10 rounded-3xl px-8 py-5 text-lg focus:border-indigo-500 outline-none transition-all placeholder:text-gray-600"
+                                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-8 py-5 text-lg focus:border-indigo-600 outline-none transition-all placeholder:text-gray-400 text-gray-900"
                                     />
                                 </div>
                             </div>
@@ -574,7 +639,7 @@ export default function Booking() {
                                 <button
                                     type="button"
                                     onClick={() => setStep(2)}
-                                    className="flex-1 py-6 bg-white/5 border-2 border-white/10 text-white font-bold rounded-3xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
+                                    className="flex-1 py-6 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-3xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest"
                                 >
                                     <ArrowLeft className="w-5 h-5" /> Atrás
                                 </button>
@@ -590,6 +655,6 @@ export default function Booking() {
                     )}
                 </AnimatePresence>
             </form>
-        </div>
+        </div >
     );
 }

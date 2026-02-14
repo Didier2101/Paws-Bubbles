@@ -90,10 +90,10 @@ export default function MyBookings() {
             cancelButtonColor: '#ef4444',
             confirmButtonText: 'Sí, cancelar',
             cancelButtonText: 'No, mantener',
-            background: '#18181b',
-            color: '#fff',
+            background: '#ffffff',
+            color: '#111827',
             customClass: {
-                popup: 'rounded-[32px] border border-white/10 glass'
+                popup: 'rounded-[32px] border border-gray-200 shadow-xl'
             }
         });
 
@@ -118,38 +118,38 @@ export default function MyBookings() {
     if (!clientEmail) return null;
 
     return (
-        <section id="my-bookings" className="py-24 bg-black relative overflow-hidden">
+        <section id="my-bookings" className="py-24 bg-gray-50 relative overflow-hidden">
             <div className="container mx-auto px-6 relative z-10">
                 <div className="flex flex-col items-center mb-16">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-6"
                     >
-                        <ShoppingBag className="w-4 h-4 text-indigo-400" />
-                        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Tus Citas</span>
+                        <ShoppingBag className="w-4 h-4 text-indigo-600" />
+                        <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Tus Citas</span>
                     </motion.div>
-                    <h2 className="text-5xl md:text-6xl font-black text-center mb-6 tracking-tighter">
-                        MIS <span className="text-indigo-500 italic">RESERVAS</span>
+                    <h2 className="text-5xl md:text-6xl font-black text-center mb-6 tracking-tighter text-gray-900">
+                        MIS <span className="text-indigo-600 italic">RESERVAS</span>
                     </h2>
-                    <p className="text-gray-400 text-center max-w-2xl text-lg leading-relaxed">
+                    <p className="text-gray-600 text-center max-w-2xl text-lg leading-relaxed">
                         Gestiona tus citas programadas. Recuerda que puedes cancelar hasta con 3 horas de antelación.
                     </p>
                 </div>
 
                 {isLoading ? (
                     <div className="flex justify-center py-20">
-                        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin"></div>
                     </div>
                 ) : bookings.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
-                        className="glass p-12 rounded-[40px] text-center border border-white/5"
+                        className="glass p-12 rounded-[40px] text-center border border-gray-200 bg-white"
                     >
                         <p className="text-gray-500 text-lg">Aún no tienes ninguna reserva realizada con este navegador.</p>
-                        <a href="#booking" className="inline-block mt-6 text-indigo-400 font-bold hover:underline">¡Reserva tu primera cita ahora!</a>
+                        <a href="#booking" className="inline-block mt-6 text-indigo-600 font-bold hover:underline">¡Reserva tu primera cita ahora!</a>
                     </motion.div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -161,22 +161,22 @@ export default function MyBookings() {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
-                                    className="glass p-8 rounded-[40px] border border-white/10 hover:border-indigo-500/30 transition-all group group-hover:shadow-[0_20px_50px_rgba(79,70,229,0.1)] relative"
+                                    className="glass p-8 rounded-[40px] border border-gray-200 bg-white hover:border-indigo-200 transition-all group group-hover:shadow-[0_20px_50px_rgba(79,70,229,0.1)] relative"
                                 >
                                     <div className="flex justify-between items-start mb-6">
-                                        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${booking.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                            booking.status === 'cancelled' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${booking.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                            booking.status === 'cancelled' ? 'bg-red-50 text-red-500 border-red-100' :
+                                                'bg-amber-50 text-amber-600 border-amber-100'
                                             }`}>
                                             {booking.status === 'confirmed' ? 'Confirmada' :
                                                 booking.status === 'cancelled' ? 'Cancelada' : 'Pendiente'}
                                         </div>
-                                        <div className="text-indigo-400/50 group-hover:text-indigo-400 transition-colors">
+                                        <div className="text-indigo-200 group-hover:text-indigo-600 transition-colors">
                                             <PawPrint className="w-8 h-8" />
                                         </div>
                                     </div>
 
-                                    <h3 className="text-2xl font-black mb-2 tracking-tight group-hover:text-indigo-400 transition-colors">
+                                    <h3 className="text-2xl font-black mb-2 tracking-tight text-gray-900 group-hover:text-indigo-600 transition-colors">
                                         {booking.pet_name}
                                     </h3>
                                     <p className="text-gray-500 text-sm mb-6 font-medium">
@@ -184,17 +184,17 @@ export default function MyBookings() {
                                     </p>
 
                                     <div className="space-y-4 mb-8">
-                                        <div className="flex items-center gap-3 text-gray-300">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
-                                                <Calendar className="w-5 h-5 text-indigo-400" />
+                                        <div className="flex items-center gap-3 text-gray-600">
+                                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                                                <Calendar className="w-5 h-5 text-indigo-600" />
                                             </div>
                                             <div className="text-sm font-bold">
                                                 {format(new Date(booking.appointment_date + 'T12:00:00'), "EEEE, d 'de' MMMM", { locale: es })}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 text-gray-300">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
-                                                <Clock className="w-5 h-5 text-indigo-400" />
+                                        <div className="flex items-center gap-3 text-gray-600">
+                                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                                                <Clock className="w-5 h-5 text-indigo-600" />
                                             </div>
                                             <div className="text-sm font-bold">
                                                 {booking.start_time.substring(0, 5)}
@@ -205,7 +205,7 @@ export default function MyBookings() {
                                     {booking.status !== 'cancelled' && (
                                         <button
                                             onClick={() => handleCancel(booking)}
-                                            className="w-full py-4 rounded-2xl bg-white/5 hover:bg-red-500/10 text-gray-400 hover:text-red-400 border border-white/10 hover:border-red-500/20 font-bold text-xs transition-all flex items-center justify-center gap-2 group/btn"
+                                            className="w-full py-4 rounded-2xl bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500 border border-gray-100 hover:border-red-100 font-bold text-xs transition-all flex items-center justify-center gap-2 group/btn"
                                         >
                                             <XCircle className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
                                             CANCELAR RESERVA
@@ -213,7 +213,7 @@ export default function MyBookings() {
                                     )}
 
                                     {booking.status === 'cancelled' && (
-                                        <div className="text-center py-4 text-xs font-bold text-gray-600 uppercase tracking-widest border border-white/5 rounded-2xl">
+                                        <div className="text-center py-4 text-xs font-bold text-gray-400 uppercase tracking-widest border border-gray-100 rounded-2xl bg-gray-50">
                                             Cita Finalizada/Cancelada
                                         </div>
                                     )}
@@ -225,8 +225,8 @@ export default function MyBookings() {
             </div>
 
             {/* Background Decorations */}
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-indigo-600/10 blur-[120px] rounded-full"></div>
-            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full"></div>
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-indigo-200/40 blur-[120px] rounded-full"></div>
+            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-200/30 blur-[120px] rounded-full"></div>
         </section>
     );
 }

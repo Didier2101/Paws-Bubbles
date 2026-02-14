@@ -16,7 +16,7 @@ export default function Header() {
 
     return (
         <>
-            <header className="sticky top-0 z-40 py-6 bg-black/80 backdrop-blur-xl border-b border-white/10">
+            <header className="sticky top-0 z-40 py-6 bg-white/80 backdrop-blur-xl border-b border-gray-200">
                 <div className="container mx-auto px-6">
                     <nav className="flex items-center justify-between">
                         <Link href="/" className="flex items-center gap-3 group text-left">
@@ -24,7 +24,7 @@ export default function Header() {
                                 <PawPrint className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-black tracking-tight leading-none uppercase italic">Paws<span className="text-indigo-500">&</span>Bubbles</span>
+                                <span className="text-xl font-black tracking-tight leading-none uppercase italic text-gray-900">Paws<span className="text-indigo-600">&</span>Bubbles</span>
                                 <span className="text-[8px] font-bold text-gray-500 tracking-[0.2em] uppercase mt-1">Grooming Studio</span>
                             </div>
                         </Link>
@@ -33,19 +33,19 @@ export default function Header() {
                         <div className="hidden md:flex items-center gap-10">
                             <Link
                                 href="/"
-                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/' ? 'text-indigo-400' : 'text-gray-400 hover:text-white'}`}
+                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
                             >
                                 Inicio
                             </Link>
                             <Link
                                 href="/servicios"
-                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/servicios' ? 'text-indigo-400' : 'text-gray-400 hover:text-white'}`}
+                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/servicios' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
                             >
                                 Servicios
                             </Link>
                             <Link
                                 href="/reserva"
-                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/reserva' ? 'text-indigo-400' : 'text-gray-400 hover:text-white'}`}
+                                className={`text-xs font-black uppercase tracking-widest transition-colors ${pathname === '/reserva' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
                             >
                                 Reservar
                             </Link>
@@ -53,7 +53,7 @@ export default function Header() {
                             {clientEmail && (
                                 <button
                                     onClick={() => setBookingsOpen(true)}
-                                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-all"
+                                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-500 transition-all"
                                 >
                                     <ShoppingBag className="w-4 h-4" />
                                     Mis Reservas
@@ -63,16 +63,16 @@ export default function Header() {
 
                         <div className="flex items-center gap-4">
                             {clientEmail ? (
-                                <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10">
+                                <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-2xl bg-gray-100 border border-gray-200">
                                     <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-black text-white">
                                         {clientName?.[0]}
                                     </div>
-                                    <span className="text-[10px] font-black text-white uppercase tracking-tighter max-w-[80px] truncate">{clientName}</span>
+                                    <span className="text-[10px] font-black text-gray-900 uppercase tracking-tighter max-w-[80px] truncate">{clientName}</span>
                                 </div>
                             ) : (
                                 <Link
                                     href="/reserva"
-                                    className="hidden md:flex px-6 py-3 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95"
+                                    className="hidden md:flex px-6 py-3 rounded-2xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-600/20 active:scale-95"
                                 >
                                     Agendar Cita
                                 </Link>
@@ -81,7 +81,7 @@ export default function Header() {
                             {/* Mobile Toggle */}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="p-3 rounded-2xl bg-white/5 border border-white/10 md:hidden hover:bg-white/10 transition-colors"
+                                className="p-3 rounded-2xl bg-gray-100 border border-gray-200 md:hidden hover:bg-gray-200 transition-colors text-gray-900"
                             >
                                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
@@ -96,27 +96,27 @@ export default function Header() {
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="absolute top-32 left-6 right-6 p-8 rounded-[40px] bg-zinc-900/90 backdrop-blur-2xl border border-white/10 shadow-2xl z-40 md:hidden"
+                            className="absolute top-32 left-6 right-6 p-8 rounded-[40px] bg-white/90 backdrop-blur-2xl border border-gray-200 shadow-2xl z-40 md:hidden"
                         >
                             <div className="flex flex-col gap-6">
                                 <Link
                                     onClick={() => setMobileMenuOpen(false)}
                                     href="/"
-                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/' ? 'text-indigo-400' : 'text-white'}`}
+                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/' ? 'text-indigo-600' : 'text-gray-900'}`}
                                 >
                                     Inicio
                                 </Link>
                                 <Link
                                     onClick={() => setMobileMenuOpen(false)}
                                     href="/servicios"
-                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/servicios' ? 'text-indigo-400' : 'text-white'}`}
+                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/servicios' ? 'text-indigo-600' : 'text-gray-900'}`}
                                 >
                                     Servicios
                                 </Link>
                                 <Link
                                     onClick={() => setMobileMenuOpen(false)}
                                     href="/reserva"
-                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/reserva' ? 'text-indigo-400' : 'text-white'}`}
+                                    className={`text-xl font-black uppercase italic tracking-tighter text-left ${pathname === '/reserva' ? 'text-indigo-600' : 'text-gray-900'}`}
                                 >
                                     Reservar
                                 </Link>
@@ -124,7 +124,7 @@ export default function Header() {
                                 {clientEmail && (
                                     <button
                                         onClick={() => { setMobileMenuOpen(false); setBookingsOpen(true); }}
-                                        className="text-xl font-black uppercase italic tracking-tighter text-indigo-400 flex items-center gap-3"
+                                        className="text-xl font-black uppercase italic tracking-tighter text-indigo-600 flex items-center gap-3"
                                     >
                                         <ShoppingBag className="w-6 h-6" /> MIS RESERVAS
                                     </button>
@@ -132,7 +132,7 @@ export default function Header() {
                                 <Link
                                     onClick={() => setMobileMenuOpen(false)}
                                     href="/reserva"
-                                    className="mt-4 w-full py-5 rounded-3xl bg-indigo-600 text-center font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20"
+                                    className="mt-4 w-full py-5 rounded-3xl bg-indigo-600 text-white text-center font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20"
                                 >
                                     <Calendar className="w-5 h-5" /> AGENDAR AHORA
                                 </Link>
